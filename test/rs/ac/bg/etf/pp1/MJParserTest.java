@@ -56,7 +56,7 @@ public class MJParserTest {
 	        	if (objFile.exists())
 	        		objFile.delete();
 	        	
-	        	 //Code generation...
+	        	// Code generation...
 //	        	CodeGenerator codeGenerator = new CodeGenerator();
 //	        	prog.traverseBottomUp(codeGenerator);
 //	        	Code.dataSize = semanticCheck.nVars;
