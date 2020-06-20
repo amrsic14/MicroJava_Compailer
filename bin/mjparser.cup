@@ -280,11 +280,11 @@ Factor ::= (DesignatorWithActFactor) Designator ActParsStartLeftParen OptionalAc
 		   |
 		   (DesignatorWithoutActFactor) Designator
 		   |
-		   (NumconstFactor) NUMCONST 
+		   (NumconstFactor) NUMCONST:value
 		   |
-		   (CharconstFactor) CHARCONST 
+		   (CharconstFactor) CHARCONST:value
 		   |
-		   (BoolconstFactor) BoolConst
+		   (BoolconstFactor) BoolConst:value
 		   |
 		   (NewTypeExprFactor) NEW Type LSQBRACE Expr RSQBRACE 
 		   |

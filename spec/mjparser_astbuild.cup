@@ -307,11 +307,11 @@ Factor ::= (DesignatorWithActFactor) Designator:D1 ActParsStartLeftParen:A2 Opti
 		   |
 		   (DesignatorWithoutActFactor) Designator:D1 {: RESULT=new DesignatorWithoutActFactor(D1); RESULT.setLine(D1left); :}
 		   |
-		   (NumconstFactor) NUMCONST:N1 {: RESULT=new NumconstFactor(N1); RESULT.setLine(N1left); :} 
+		   (NumconstFactor) NUMCONST:value {: RESULT=new NumconstFactor(value); RESULT.setLine(valueleft); :}
 		   |
-		   (CharconstFactor) CHARCONST:C1 {: RESULT=new CharconstFactor(C1); RESULT.setLine(C1left); :} 
+		   (CharconstFactor) CHARCONST:value {: RESULT=new CharconstFactor(value); RESULT.setLine(valueleft); :}
 		   |
-		   (BoolconstFactor) BoolConst:B1 {: RESULT=new BoolconstFactor(B1); RESULT.setLine(B1left); :}
+		   (BoolconstFactor) BoolConst:value {: RESULT=new BoolconstFactor(value); RESULT.setLine(valueleft); :}
 		   |
 		   (NewTypeExprFactor) NEW Type:T1 LSQBRACE Expr:E2 RSQBRACE {: RESULT=new NewTypeExprFactor(T1, E2); RESULT.setLine(T1left); :} 
 		   |

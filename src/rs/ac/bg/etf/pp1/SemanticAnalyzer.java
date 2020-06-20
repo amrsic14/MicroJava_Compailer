@@ -13,6 +13,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
 	boolean errorDetected = false;
 	int printCallCount = 0;
+	int formParams = 0;
 	Obj currentMethod = null;
 	boolean returnFound = false;
 	int nVars;
@@ -39,35 +40,98 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		log.info(msg.toString());
 	}
 	
-	public void visit(Program program) {		
+	public SemanticAnalyzer() {
+		Tab.currentScope.addToLocals(new Obj(Obj.Type, "bool", new Struct(Struct.Bool)));
+	}
+	
+	public void visit(Program program) {
+		Obj main = Tab.currentScope.findSymbol("main");
+		
+		if (main == null) {
+			report_error("Funkcija main() ne postoji u programu ", program);
+		} else {
+			if (main.getKind() == Obj.Meth) {
+				if (main.getLevel() > 0) {
+					report_error("main() ne sme sadrzati parametre", program);
+				}
+				if (main.getType() != Tab.noType) {
+					report_error("main() mora biti void ", program);
+				}
+			} else {
+				report_error("main nije metoda ", program);
+			}
+		}
+		
 		nVars = Tab.currentScope.getnVars();
 		Tab.chainLocalSymbols(program.getProgName().obj);
 		Tab.closeScope();
 	}
 
 	public void visit(ProgName progName) {
-		progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
+		Obj symbol = Tab.currentScope.findSymbol(progName.getPName());
+		if (symbol != null) {
+			report_error("Ovo ime vec postoji " + progName.getPName(), progName);
+			progName.obj = new Obj(Obj.Prog, progName.getPName(), Tab.noType);
+		} else {
+			progName.obj = Tab.insert(Obj.Prog, progName.getPName(), Tab.noType);
+		}
 		Tab.openScope();
 	}
 	
 	public void visit(ConstNum constNum) {
-		Tab.insert(Obj.Var, constNum.getName(), recentTypeVisited);
+		Obj symbol = Tab.currentScope.findSymbol(constNum.getName());
+		
+		if(symbol != null)
+			report_error(constNum.getName() + " - vec postoji", constNum);
+		else
+			Tab.insert(Obj.Con, constNum.getName(), recentTypeVisited).setAdr(constNum.getValue());
 	}
 
 	public void visit(ConstChar constChar) {
-		Tab.insert(Obj.Var, constChar.getName(), recentTypeVisited);
+		Obj symbol = Tab.currentScope.findSymbol(constChar.getName());
+		
+		if(symbol != null)
+			report_error(constChar.getName() + " - vec postoji", constChar);
+		else
+			Tab.insert(Obj.Con, constChar.getName(), recentTypeVisited).setAdr(constChar.getValue());
 	}
 	
 	public void visit(ConstBool constBool) {
-		Tab.insert(Obj.Var, constBool.getName(), recentTypeVisited);
+		Obj symbol = Tab.currentScope.findSymbol(constBool.getName());
+		if(symbol != null)
+			report_error(constBool.getName() + " - vec postoji", constBool);
+		else
+			Tab.insert(Obj.Con, constBool.getName(), recentTypeVisited).setAdr(constBool.getBoolConst().obj.getAdr());
+	}
+	
+	public void visit(False falseConst) {
+		Obj falseValue = new Obj(Obj.Con, "", new Struct(Struct.Bool));
+		falseValue.setAdr(0);
+		falseConst.obj = falseValue;
+	}
+	
+	public void visit(True trueConst) {
+		Obj trueValue = new Obj(Obj.Con, "", new Struct(Struct.Bool));
+		trueValue.setAdr(1);
+		trueConst.obj = trueValue;
 	}
 	
 	public void visit(VarArray varArray) {
-		Tab.insert(Obj.Var, varArray.getName(), new Struct(Struct.Array ,recentTypeVisited));
+		Obj symbol = Tab.currentScope.findSymbol(varArray.getName());
+		
+		if(symbol != null)
+			report_error(varArray.getName() + " - vec postoji", varArray);
+		else
+			Tab.insert(Obj.Var, varArray.getName(), new Struct(Struct.Array ,recentTypeVisited));
 	}
 	
 	public void visit(SingleVar singleVar) {
-		Tab.insert(Obj.Var, singleVar.getName(), recentTypeVisited);
+		Obj symbol = Tab.currentScope.findSymbol(singleVar.getName());
+		
+		if(symbol != null)
+			report_error(singleVar.getName() + " - vec postoji", singleVar);
+		else
+			Tab.insert(Obj.Var, singleVar.getName(), recentTypeVisited);
 	}
 	
 	public void visit(VarDeclError varDeclError) {
@@ -103,23 +167,42 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		
 		Tab.chainLocalSymbols(currentMethod);
 		Tab.closeScope();
+		currentMethod.setLevel(formParams);
+
+		formParams = 0;
 		
 		returnFound = false;
 		currentMethod = null;
 	}
 
 	public void visit(MethodRetTypeName methodRetTypeName) {
-		currentMethod = Tab.insert(Obj.Meth, methodRetTypeName.getMethName(), methodRetTypeName.getType().struct);
-		methodRetTypeName.obj = currentMethod;
+		Obj symbol = Tab.currentScope.findSymbol(methodRetTypeName.getMethName());
+		
+		if(symbol != null) {
+			report_error(methodRetTypeName.getMethName() + " - vec postoji", methodRetTypeName);
+			currentMethod = new Obj(Obj.Meth, methodRetTypeName.getMethName(), methodRetTypeName.getType().struct);
+		}
+		else {
+			currentMethod = Tab.insert(Obj.Meth, methodRetTypeName.getMethName(), methodRetTypeName.getType().struct);
+			methodRetTypeName.obj = currentMethod;
+		}
+		
 		Tab.openScope();
-		report_info("Obradjuje se funkcija " + methodRetTypeName.getMethName(), methodRetTypeName);
 	}
 	
 	public void visit(MethodRetVoidName methodRetVoidName) {
-		currentMethod = Tab.insert(Obj.Meth, methodRetVoidName.getMethName(), Tab.noType);
-		methodRetVoidName.obj = currentMethod;
+		Obj symbol = Tab.currentScope.findSymbol(methodRetVoidName.getMethName());
+		
+		if(symbol != null) {
+			report_error(methodRetVoidName.getMethName() + " - vec postoji", methodRetVoidName);
+			currentMethod = new Obj(Obj.Meth, methodRetVoidName.getMethName(), Tab.noType);
+		}
+		else {
+			currentMethod = Tab.insert(Obj.Meth, methodRetVoidName.getMethName(), Tab.noType);
+			methodRetVoidName.obj = currentMethod;
+		}
+		
 		Tab.openScope();
-		report_info("Obradjuje se funkcija " + methodRetVoidName.getMethName(), methodRetVoidName);
 	}
 	
 	public void visit(MethodDeclError methodDeclError) {
@@ -131,11 +214,21 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 	
 	public void visit(FormalParamDeclSingle formalParamDeclSingle) {
-		Tab.insert(Obj.Var, formalParamDeclSingle.getName(), recentTypeVisited);
+		Obj symbol = Tab.currentScope.findSymbol(formalParamDeclSingle.getName());
+		
+		if(symbol != null)
+			report_error(formalParamDeclSingle.getName() + " - vec postoji", formalParamDeclSingle);
+		else
+			Tab.insert(Obj.Var, formalParamDeclSingle.getName(), recentTypeVisited).setFpPos(++formParams);
 	}
 	
 	public void visit(FormalParamDeclArray formalParamDeclArray) {
-		Tab.insert(Obj.Var, formalParamDeclArray.getName(), new Struct(Struct.Array, recentTypeVisited));
+		Obj symbol = Tab.currentScope.findSymbol(formalParamDeclArray.getName());
+		
+		if(symbol != null)
+			report_error(formalParamDeclArray.getName() + " - vec postoji", formalParamDeclArray);
+		else
+			Tab.insert(Obj.Var, formalParamDeclArray.getName(), new Struct(Struct.Array, recentTypeVisited)).setFpPos(++formParams);
 	}
 	
 	public void visit(StatementForError statementForError) {
@@ -147,7 +240,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(StatementFor statementFor) {
-		//report_info("Detektovano koriscenje for petlje", statementFor);
 		forLevel--;
 	}
 	
@@ -409,19 +501,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			report_error("Indeks niza mora biti tipa int ", null);
 		}
 	}
-	
-//	public void visit(DesignatorClass designatorClass) {
-//		int kind = designatorClass.getDesignator().obj.getKind();
-//		if (kindCheck(kind)) {
-//			designatorClass.obj = designatorClass.getDesignator().obj.getType().getMembersTable()
-//					.searchKey(designatorClass.getName());
-//			if (designatorClass.obj == null) {
-//				report_error("Greska na liniji " + designatorClass.getLine()
-//						+ " : nije ubaceno nista u designator class " + kind, null);
-//				designatorClass.obj = Tab.noObj;
-//			}
-//		}
-//	}
 	
 	public boolean passed() {
 		return !errorDetected;
