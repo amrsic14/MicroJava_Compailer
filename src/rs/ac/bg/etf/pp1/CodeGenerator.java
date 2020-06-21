@@ -1,7 +1,5 @@
 package rs.ac.bg.etf.pp1;
 
-import rs.ac.bg.etf.pp1.CounterVisitor.FormParamCounter;
-import rs.ac.bg.etf.pp1.CounterVisitor.VarCounter;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
@@ -62,6 +60,11 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
+	public void visit(FactorDesignatorNoActs designator) {
+		Code.load(designator.getDesignator().obj);
+	}
+	
+	@Override
 	public void visit(MethodRetVoidName method) {
 		if ("main".equalsIgnoreCase(method.getMethName())) {
 			mainPc = Code.pc;
@@ -75,17 +78,12 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(DesignatorStatementAssignop assignment) {
+	public void visit(AssignopDesigStatement assignment) {
 		Code.store(assignment.getDesignator().obj);
-	}
-	
-	@Override
-	public void visit(DesignatorWithoutActFactor designator) {
-		Code.load(designator.getDesignator().obj);
 	}
 
 	@Override
-	public void visit(DesignatorWithActFactor funcCall) {
+	public void visit(FactorDesignatorHasActs funcCall) {
 		Code.put(Code.call);
 		Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
 	}
@@ -95,7 +93,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(DesignatorStatementOptAct funcCall) {
+	public void visit(OptionalActualsDesigStatement funcCall) {
 		Code.put(Code.call);
 		Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
 		if (funcCall.getDesignator().obj.getType() != Tab.noType) {
@@ -104,7 +102,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(DesignatorStatementDEC designator) {
+	public void visit(DecDesigStatement designator) {
 		Obj obj = designator.getDesignator().obj;
 		
 		if (isElem(obj)) {
@@ -118,7 +116,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(DesignatorStatementINC designator) {
+	public void visit(IncDesigStatement designator) {
 		Obj obj = designator.getDesignator().obj;
 		
 		if (isElem(obj)) {
@@ -132,17 +130,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(StatementReturn ret) {
-		setMethodReturn();
-	}
-	
-	@Override
-	public void visit(MethodDeclRegular method) {
-		setMethodReturn();
-	}
-	
-	@Override
-	public void visit(StatementPrintNoConst print) {
+	public void visit(PrintStatement print) {
 		Struct struct = print.getExpr().struct;
 		if (Tab.charType != struct) {
 			Code.loadConst(4);
@@ -154,7 +142,7 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(StatementPrintWithConst print) {
+	public void visit(PrintConstStatement print) {
 		Struct struct = print.getExpr().struct;
 		Code.loadConst(print.getN2());
 		if (Tab.charType != struct) {
@@ -165,55 +153,62 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(NumconstFactor Const) {
-		Code.loadConst(Const.getValue());
-	}
-
-	@Override
-	public void visit(CharconstFactor Const) {
-		Code.loadConst(Const.getValue());
-	}
-
-	@Override
-	public void visit(BoolconstFactor Const) {
-		Code.loadConst(Const.getBoolConst().obj.getAdr());
+	public void visit(ReturnStatement ret) {
+		setMethodReturn();
 	}
 	
 	@Override
-	public void visit(NewTypeExprFactor array) {
+	public void visit(MethodDeclaration method) {
+		setMethodReturn();
+	}
+	
+	@Override
+	public void visit(FactorNumconst factorNumconst) {
+		Code.loadConst(factorNumconst.getValue());
+	}
+
+	@Override
+	public void visit(FactorCharconst factorCharconst) {
+		Code.loadConst(factorCharconst.getValue());
+	}
+
+	@Override
+	public void visit(FactorBoolconst factorBoolconst) {
+		Code.loadConst(factorBoolconst.getBoolConst().obj.getAdr());
+	}
+	
+	@Override
+	public void visit(TermMinus termMinus) {
+		Code.put(Code.neg);
+	}
+	
+	@Override
+	public void visit(FactorNewTypeExpr array) {
 		Code.put(Code.newarray);
-		if (array.getType().struct == Tab.intType) {
-			Code.put(1);
-		} else {
-			Code.put(0);
-		}
+		if (array.getType().struct == Tab.intType) Code.put(1);
+		if (array.getType().struct == Tab.charType) Code.put(0);
 	}
 	
 	@Override
-	public void visit(OnlyArrayDesignator designator) {
+	public void visit(ArrDesig designator) {
 		Code.load(designator.getDesignator().obj);
 	}
 	
 	@Override
-	public void visit(MultyTerms addExpr) {
-		if (addExpr.getAddop() instanceof AddopMinus) Code.put(Code.sub);
-		if (addExpr.getAddop() instanceof AddopPlus) Code.put(Code.add);
+	public void visit(TermsList addExpr) {
+		if (addExpr.getAddop() instanceof Minus) Code.put(Code.sub);
+		if (addExpr.getAddop() instanceof Plus) Code.put(Code.add);
 	}
 
 	@Override
-	public void visit(MinusTerm minusTerm) {
-		Code.put(Code.neg);
-	}
-
-	@Override
-	public void visit(MulopFactorTerm mulFact) {
-		if (mulFact.getMulop() instanceof MulopMod) Code.put(Code.rem);
-		if (mulFact.getMulop() instanceof MulopDiv) Code.put(Code.div);
-		if (mulFact.getMulop() instanceof MulopMul) Code.put(Code.mul);
+	public void visit(TermMulopFactor termMulopFactor) {
+		if (termMulopFactor.getMulop() instanceof Mod) Code.put(Code.rem);
+		if (termMulopFactor.getMulop() instanceof Div) Code.put(Code.div);
+		if (termMulopFactor.getMulop() instanceof Mul) Code.put(Code.mul);
 	}
 	
 	@Override
-	public void visit(StatementRead read) {
+	public void visit(ReadStatement read) {
 		Obj obj = read.getDesignator().obj;
 		if (Tab.charType != obj.getType()) {
 			Code.put(Code.read);
@@ -222,6 +217,5 @@ public class CodeGenerator extends VisitorAdaptor {
 		}
 		Code.store(obj);
 	}
-	
 	
 }

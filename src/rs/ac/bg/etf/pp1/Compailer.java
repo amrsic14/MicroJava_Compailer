@@ -15,7 +15,7 @@ import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
 
 
-public class MJParserTest {
+public class Compailer {
 
 	static {
 		DOMConfigurator.configure(Log4JUtils.instance().findLoggerConfigFile());
@@ -23,7 +23,7 @@ public class MJParserTest {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Logger log = Logger.getLogger(MJParserTest.class);
+		Logger log = Logger.getLogger(Compailer.class);
 		if (args.length < 2) {
 			log.error("Not enough arguments supplied! Usage: MJParser <source-file> <obj-file> ");
 			return;
@@ -57,12 +57,12 @@ public class MJParserTest {
 	        		objFile.delete();
 	        	
 	        	// Code generation...
-//	        	CodeGenerator codeGenerator = new CodeGenerator();
-//	        	prog.traverseBottomUp(codeGenerator);
-//	        	Code.dataSize = semanticCheck.nVars;
-//	        	Code.mainPc = codeGenerator.getMainPc();
-//	        	Code.write(new FileOutputStream(objFile));
-//	        	log.info("Parsiranje uspesno zavrseno!");
+	        	CodeGenerator codeGenerator = new CodeGenerator();
+	        	prog.traverseBottomUp(codeGenerator);
+	        	Code.dataSize = semanticCheck.nVars;
+	        	Code.mainPc = codeGenerator.getMainPc();
+	        	Code.write(new FileOutputStream(objFile));
+	        	log.info("Parsiranje uspesno zavrseno!");
 	        }
 	        else {
 	        	log.error("Parsiranje NIJE uspesno zavrseno!");

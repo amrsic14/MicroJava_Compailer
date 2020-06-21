@@ -61,21 +61,22 @@
 	</target>
 	
 	<target name="disasm">
-		<javac classname="rs.etf.pp1.mj.runtime.disasm">
+		<java classname="rs.etf.pp1.mj.runtime.disasm">
 			<arg value="test/program.obj"/>
 			<classpath>
-				<pathelement path="lib/mj-runtime-1.1.jar"/>
+				<pathelement location="lib/mj-runtime-1.1.jar"/>
 			</classpath>
-		</javac>
+		</java>
 	</target>
 
-	<target name="runObj" depends="disasm">
-		<javac classname="rs.etf.pp1.mj.runtime.Run">
+	<target name="runObj" depends="disasm" >
+		<java classname="rs.etf.pp1.mj.runtime.Run">
 			<arg value="test/program.obj"/>
+			
 			<classpath>
-				<pathelement path="lib/mj-runtime-1.1.jar"/>
+				<pathelement location="lib/mj-runtime-1.1.jar"/>
 			</classpath>
-		</javac>
+		</java>
 	</target>
 	
 </project>

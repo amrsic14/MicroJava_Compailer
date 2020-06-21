@@ -10,9 +10,6 @@ parser code {:
 	boolean errorDetected = false;
 	
 	Logger log = Logger.getLogger(getClass());
-   
-   
-    // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
      
     public void report_fatal_error(String message, Object info) throws java.lang.Exception {
       done_parsing();
@@ -52,279 +49,208 @@ scan with {:
 :}
 
 
-terminal PROGRAM, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, COMMA, PRINT, RETURN, PLUS, ASSIGN, VOID, LSQBRACE, RSQBRACE, INC, DEC, OR, AND, MINUS, DOT;
-terminal MUL, DIV, MOD;
+terminal PROGRAM, LBRACE, RBRACE, SEMI, LSQBRACE, RSQBRACE, INC, DEC, OR, AND, MINUS, DOT, PRINT, RETURN, PLUS, CONTINUE;
+terminal MUL, DIV, MOD, LPAREN, RPAREN, ASSIGN, VOID, FOR, BREAK, COMMA, IF, ELSE,  CONST, NEW, TRUE, FALSE, EQUAL, LESS;
+terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ;
 terminal Integer NUMCONST ;
 terminal Character CHARCONST;
-//terminal Boolean BOOLCONST;
 terminal String IDENT;
-terminal IF, ELSE, FOR, BREAK, CONTINUE, READ;
-terminal CONST, NEW;
-terminal EQUAL, NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, LESS;
-terminal TRUE, FALSE;
 
-nonterminal MethodDeclList, VarDecl, DeclList, ConstDecl;
-nonterminal FormalParamList, FormalParamDecl, FormPars; 
-nonterminal StatementList, Statement, Addop, Relop, Mulop;
-nonterminal Else, ForSemi, And, Or, IfLeftParen;
-nonterminal ConstList, Const, IfCondition;
-nonterminal VarList, Var, OnlyArrayDesignator;
-nonterminal DesignatorStatement, Condition, OptionalDesignatorStatement, OptionalCondition, OptionalExpression, ForRightParen, ActParsStartLeftParen;
-nonterminal Assignop, OptionalActPars, ActParsList, ActPar;
-nonterminal CondTerm, CondFact;
-//nonterminal BoolConst;
+nonterminal MethodList, DesignatorStatement, Condition, OptDesigStatement, VarDecl, ConstList, Const, DeclList, Var;
+nonterminal FParamDeclList, OptExpr, ForParenEnd, DesigOptActLeftParen, ForFirstSemi, And, FParamDeclaration, FormPars; 
+nonterminal StatementList, Else, IfCondBegin, Statement, Addop, OptActualParams, ActPars, Relop, Mulop, IfCond, OptCond;
+nonterminal VarList, ConstDecl, ArrDesig, Assignop, CondTerm, CondFact, ActualParam, Or;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, Designator, MethodDecl, MethodTypeName, BoolConst; 
-nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Expr, Term, Factor, VarDeclList; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl, BoolConst; 
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Factor, Expr, Term, VarDeclList; 
 
 precedence left ELSE;
 
-Program ::= (Program) PROGRAM ProgName DeclList LBRACE MethodDeclList RBRACE;
+Program ::= (Program) PROGRAM ProgName DeclList LBRACE MethodList RBRACE;
 
 ProgName ::= (ProgName) IDENT:pName;
 
-DeclList ::=(DeclListConst) DeclList ConstDecl
-			|
-			(DeclListVar) DeclList VarDecl
-			|
-			(NoDeclList)
+DeclList ::=	(ConstDeclList) DeclList ConstDecl
+			|	(VarsDeclList) DeclList VarDecl
+			|	(NoDeclList)
+			;
+
+ConstList ::=	(Constants) ConstList COMMA Const
+			|	(Constant) Const
 			;
 
 ConstDecl ::= (ConstDecl) CONST Type ConstList SEMI;
 
-ConstList ::=(Constants) ConstList COMMA Const
-			|
-			(Constant) Const
-			;
-
-Const ::= (ConstNum) IDENT:name ASSIGN NUMCONST:value
-		|
-		(ConstChar) IDENT:name ASSIGN CHARCONST:value
-		|
-		(ConstBool) IDENT:name ASSIGN BoolConst:value
+Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value
+		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value
+		|	(ConstBool) IDENT:name ASSIGN BoolConst:value
 		;
 
-BoolConst ::= (True) TRUE
-			|
-			(False) FALSE
+BoolConst ::= 	(True) TRUE
+			|	(False) FALSE
 			;
 
-VarDeclList ::= (VarDeclarations) VarDeclList VarDecl  
-				|
-				(NoVarDecl)
+VarDeclList ::= 	(VarDeclarations) VarDeclList VarDecl  
+				|	(NoVarDecl)
 				;
 
-VarDecl ::= (VarDeclNoError) Type VarList SEMI
-			|
-			(VarDeclError) Type error SEMI
+VarList ::= 	(VariableList) VarList COMMA Var
+			|	(VariableListSingleVar) Var
+			|	(VariableListError) error COMMA Var
+			;
+			
+VarDecl ::= 	(VarDeclaration) Type VarList SEMI
+			|	(VarDeclarationError) Type error SEMI
 			;
 
-VarList ::= (SameTypeVars) VarList COMMA Var
-			|
-			(SameTypeVarsError) error COMMA Var
-			|
-			(SingleSameTypeVar) Var
-			;
-
-Var ::= (VarArray) IDENT:name LSQBRACE RSQBRACE
-		|
-		(SingleVar) IDENT:name 
+Var ::= 	(VarArray) IDENT:name LSQBRACE RSQBRACE
+		|	(SingleVar) IDENT:name 
 		;
 
 Type ::= (Type) IDENT:typeName
 		;
 
-MethodDeclList ::= (MethodDeclarations) MethodDeclList MethodDecl
-				|
-				(NoMethodDecl)
-				;
-
-MethodDecl ::= (MethodDeclRegular) MethodTypeName LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE
-			|
-			(MethodDeclError) MethodTypeName LPAREN error RPAREN VarDeclList LBRACE StatementList RBRACE
+MethodList ::= 	(MethodDeclarations) MethodList MethodDecl
+			|	(NoMethodDecl)
 			;
 
-MethodTypeName ::= (MethodRetTypeName) Type:retType IDENT:methName
-				|
-			   	(MethodRetVoidName) VOID:retType IDENT:methName
+MethodDecl ::= 	(MethodDeclaration) MethodTypeName LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE
+			|	(MethodDeclarationError) MethodTypeName LPAREN error RPAREN VarDeclList LBRACE StatementList RBRACE
+			;
+
+MethodTypeName ::= 	(MethodRetTypeName) Type:retType IDENT:methName
+				|	(MethodRetVoidName) VOID:retType IDENT:methName
 				;
 
-FormPars ::= (FormParams) FormalParamList 
-			 |
-			 (NoFormParam);
+FormPars ::= 	(FormalParameters) FParamDeclList
+			 |	(NoFormalParameters)
+			 ;
 
-FormalParamList ::= (FormalParamDecls) FormalParamList COMMA FormalParamDecl
-					|
-					(FormalParamDeclsError) error COMMA FormalParamDecl
-					|
-					(SingleFormalParamDecl) FormalParamDecl
-					;
-
-FormalParamDecl ::= (FormalParamDeclSingle) Type IDENT:name 
-					|
-					(FormalParamDeclArray) Type IDENT:name LSQBRACE RSQBRACE 
-					;
-
-StatementList ::= (Statements) StatementList Statement 
-				|
-				(NoStmt)
+FParamDeclList ::= 	(FParamDeclarations) FParamDeclList COMMA FParamDeclaration
+				|	(FParamDeclSingle) FParamDeclaration
+				|	(FParamDeclListError) error COMMA FParamDeclaration
 				;
 
-Statement ::= (StatementDesignatorStatement) DesignatorStatement SEMI
-			  |
-			  (StatementIf) IF IfLeftParen IfCondition RPAREN Statement
-			  |
-			  (StatementIfElse) IF IfLeftParen IfCondition RPAREN Statement Else Statement
-			  |
-			  (StatementFor) FOR LPAREN OptionalDesignatorStatement ForSemi OptionalCondition SEMI OptionalDesignatorStatement ForRightParen Statement
-			  |
-			  (StatementForError) FOR LPAREN OptionalDesignatorStatement ForSemi error SEMI OptionalDesignatorStatement ForRightParen Statement
-			  |
-			  (StatementBreak) BREAK SEMI
-			  |
-			  (StatementContinue) CONTINUE SEMI
-			  |
-			  (StatementReturn) RETURN OptionalExpression SEMI
-			  |
-			  (StatementRead) READ LPAREN Designator RPAREN SEMI
-			  |
-			  (StatementPrintNoConst) PRINT LPAREN Expr RPAREN SEMI
-			  |
-			  (StatementPrintWithConst) PRINT LPAREN Expr COMMA NUMCONST RPAREN SEMI
-			  |
-			  (StatementMulty) LBRACE StatementList RBRACE
+FParamDeclaration ::= 	(FormalParamArray) Type IDENT:name LSQBRACE RSQBRACE
+					|	(FormalParamSingle) Type IDENT:name
+					;
+
+StatementList ::= 	(Statements) StatementList Statement 
+				|	(NoStmt)
+				;
+
+Statement ::= 	(StatementDesignator) DesignatorStatement SEMI
+			  |	(ForStatement) FOR LPAREN OptDesigStatement ForFirstSemi OptCond SEMI OptDesigStatement ForParenEnd Statement
+			  |	(ForStatementError) FOR LPAREN OptDesigStatement ForFirstSemi error SEMI OptDesigStatement ForParenEnd Statement
+			  |	(IfStatement) IF IfCondBegin IfCond RPAREN Statement
+			  |	(IfElseStatement) IF IfCondBegin IfCond RPAREN Statement Else Statement
+			  |	(ReturnStatement) RETURN OptExpr SEMI
+			  |	(BreakStatement) BREAK SEMI
+			  |	(ContinueStatement) CONTINUE SEMI
+			  |	(PrintConstStatement) PRINT LPAREN Expr COMMA NUMCONST RPAREN SEMI
+			  |	(PrintStatement) PRINT LPAREN Expr RPAREN SEMI
+			  |	(ReadStatement) READ LPAREN Designator RPAREN SEMI
+			  |	(MultyStatement) LBRACE StatementList RBRACE
 			  ;
 
-IfLeftParen ::= (IfLeftParen) LPAREN; 
+IfCondBegin ::= (IfCondBegin) LPAREN; 
 
-ForSemi ::= (ForSemi) SEMI;		  
+ForFirstSemi ::= (ForFirstSemi) SEMI;		  
 
-IfCondition ::= (IfCondition) Condition;
+IfCond ::= (IfCond) Condition;
 
 Else ::= (Else) ELSE;
 
-ForRightParen ::= (ForRightParen) RPAREN;
+ForParenEnd ::= (ForParenEnd) RPAREN;
 
-OptionalDesignatorStatement ::= (WithDesignatorStatement) DesignatorStatement
-								|
-								(NoDesignatorStatement)
-								;
-
-DesignatorStatement ::= (DesignatorStatementAssignop) Designator Assignop Expr
-						|
-						(DesignatorStatementAssignopError) Designator Assignop error
-						|
-						(DesignatorStatementOptAct) Designator ActParsStartLeftParen OptionalActPars RPAREN
-						|
-						(DesignatorStatementINC) Designator INC 
-						|
-						(DesignatorStatementDEC) Designator DEC
-						;
-
-ActParsStartLeftParen ::= (ActParsStartLeftParen) LPAREN;
-
-OptionalActPars ::= (WithActPars) ActParsList 
-				|
-				(NoActPars)
-				;
-
-ActParsList  ::= (MultyActPars) ActParsList COMMA ActPar
-				|
-				(SingleActPars) ActPar
-				;
-
-ActPar ::= (ActPar) Expr;
-
-OptionalCondition ::= (WithCondition) Condition  
-					|
-					(NoCondition)
+OptDesigStatement ::= 	(HasDesigStatement) DesignatorStatement
+					|	(NoDesignatorStatement)
 					;
 
-Condition ::= (MultyCondTerm) Condition Or CondTerm
-			|
-			(SingleCondTerm) CondTerm
+DesignatorStatement ::= (AssignopDesigStatement) Designator Assignop Expr
+					|	(AssignopDesigStatementError) Designator Assignop error
+					|	(IncDesigStatement) Designator INC 
+					|	(DecDesigStatement) Designator DEC
+					|	(OptionalActualsDesigStatement) Designator DesigOptActLeftParen OptActualParams RPAREN
+					;
+
+DesigOptActLeftParen ::= (DesigOptActLeftParen) LPAREN;
+
+OptActualParams ::= (HasActualParams) ActPars 
+				|	(NoActualParams)
+				;
+
+ActPars ::=	(ActParamsList) ActPars COMMA ActualParam
+		|	(SingleActParam) ActualParam
+		;
+
+ActualParam ::= (ActualParam) Expr;
+
+OptCond ::= (HasCondition) Condition  
+		|	(NoCondition)
+		;
+
+Condition ::= 	(ConditionTermList) Condition Or CondTerm
+			|	(SingleConditionTerm) CondTerm
 			;
 
-CondTerm ::= (MultyCondFact) CondTerm And CondFact
-			|
-			(SingleCondFact) CondFact
+CondTerm ::= 	(ConditionFactList) CondTerm And CondFact
+			|	(SingleConditionFact) CondFact
 			;
 
 And ::= (And) AND;
 
 Or ::= (Or) OR;
 
-CondFact ::= (RelopCondFact) Expr Relop Expr
-			 |
-			 (ExprCondFact) Expr 
+CondFact ::= 	(ConditionFactRelop) Expr Relop Expr
+			 |	(ConditionFactExpr) Expr 
 			 ;
 
-OptionalExpression ::= (WithExpression) Expr
-				|
-				(NoExpression)
-				;		
+OptExpr ::= (HasExpression) Expr
+		|	(NoExpression)
+		;		
 
-Expr ::= (MultyTerms) Expr Addop Term 
-		|
-		(PlusTerm) Term 
-		|
-		(MinusTerm) MINUS Term 
+Expr ::= 	(TermsList) Expr Addop Term 
+		|	(TermPlus) Term 
+		|	(TermMinus) MINUS Term 
 		;
 
-Term ::= (MulopFactorTerm) Term Mulop Factor
-		 |
-		 (SingleFactorTerm) Factor 
+Term ::= 	(TermMulopFactor) Term Mulop Factor
+		 |	(FactorTermSingle) Factor 
 		 ;
 
-Factor ::= (DesignatorWithActFactor) Designator ActParsStartLeftParen OptionalActPars RPAREN 
-		   |
-		   (DesignatorWithoutActFactor) Designator
-		   |
-		   (NumconstFactor) NUMCONST:value
-		   |
-		   (CharconstFactor) CHARCONST:value
-		   |
-		   (BoolconstFactor) BoolConst:value
-		   |
-		   (NewTypeExprFactor) NEW Type LSQBRACE Expr RSQBRACE 
-		   |
-		   (NewTypeFactor) NEW Type 
-		   |
-		   (ParenthesesFactor) LPAREN Expr RPAREN
+Factor ::= 	(FactorDesignatorHasActs) Designator DesigOptActLeftParen OptActualParams RPAREN 
+		   |(FactorDesignatorNoActs) Designator
+		   |(FactorNewTypeExpr) NEW Type LSQBRACE Expr RSQBRACE 
+		   |(FactorNewType) NEW Type
+		   |(FactorNumconst) NUMCONST:value
+		   |(FactorCharconst) CHARCONST:value
+		   |(FactorBoolconst) BoolConst:value
+		   |(FactorParenths) LPAREN Expr RPAREN
            ;
 
-Designator ::= (DesignatorArray) OnlyArrayDesignator LSQBRACE Expr RSQBRACE
-			|
-			(DesignatorClass) Designator DOT IDENT:name
-			|
-			(SimpleDesignator) IDENT:name
+Designator ::= 	(ArrayDesignator) ArrDesig LSQBRACE Expr RSQBRACE
+			|	(ClassDesignator) Designator DOT IDENT:name
+			|	(SimpleDesignator) IDENT:name
 			;
 
-OnlyArrayDesignator ::= (OnlyArrayDesignator) Designator;
+ArrDesig ::= (ArrDesig) Designator;
+
+Addop ::= 	(Plus) PLUS 
+		  |	(Minus) MINUS
+		  ;
+
+Mulop ::= 	(Mul) MUL
+		  |	(Div) DIV 
+		  |	(Mod) MOD
+		  ;
 
 Assignop ::= (Assignop) ASSIGN;
 
-Relop ::= (RelopEqual) EQUAL
-		  |
-		  (RelopNotEqual) NOTEQUAL
-		  |
-		  (RelopGreater) GREATER
-		  |
-		  (RelopGreaterEqual) GREATEREQUAL
-		  |
-		  (RelopLess) LESS
-		  |
-		  (RelopLessEqual) LESSEQUAL
-		  ;
-
-Addop ::= (AddopPlus) PLUS 
-		  |
-		  (AddopMinus) MINUS
-		  ;
-
-Mulop ::= (MulopMul) MUL
-		  |
-		  (MulopDiv) DIV 
-		  |
-		  (MulopMod) MOD
+Relop ::= 	(Equal) EQUAL
+		  |	(NotEqual) NOTEQUAL
+		  |	(Greater) GREATER
+		  |	(GreaterEqual) GREATEREQUAL
+		  |	(Less) LESS
+		  |	(LessEqual) LESSEQUAL
 		  ;
