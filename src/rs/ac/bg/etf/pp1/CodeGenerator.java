@@ -5,6 +5,7 @@ import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
+import rs.etf.pp1.symboltable.visitors.DumpSymbolTableVisitor;
 
 public class CodeGenerator extends VisitorAdaptor {
 	
@@ -78,8 +79,46 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
-	public void visit(AssignopDesigStatement assignment) {
+	public void visit(AssignopDesigStatement assignment) {		
+		Assignop assign = assignment.getAssignop();
+		
+		if(assign instanceof AssignopAddopRight) {
+			
+			AddopRight ar = ((AssignopAddopRight) assign).getAddopRight();
+			if (ar instanceof MinusEqual) {
+				Code.put(Code.sub);
+				Code.put(Code.dup);
+			}
+			else if (ar instanceof PlusEqual) {
+				Code.put(Code.add);
+				Code.put(Code.dup);
+			}
+		}
+		else if(assign instanceof AssignMulopRight) {
+			MulopRight mr = ((AssignMulopRight) assign).getMulopRight();
+			if(mr instanceof MulEqual) {
+				Code.put(Code.mul);
+				Code.put(Code.dup);
+			}
+			else if(mr instanceof DivEqual) {
+				Code.put(Code.div);
+				Code.put(Code.dup);
+			}
+			else if(mr instanceof ModEqual) {
+				Code.put(Code.rem);
+				Code.put(Code.dup);
+			}
+		}
+		
 		Code.store(assignment.getDesignator().obj);
+	}
+	
+	@Override
+	public void visit(ArrayDesignator designatorArray) {
+		if(designatorArray.getParent() instanceof AssignopDesigStatement) {
+			designatorArray.getArrDesig().getDesignator().obj = new Obj(Obj.Elem, "Elem", designatorArray.getArrDesig().getDesignator().obj.getType());
+			Code.load(designatorArray.getArrDesig().getDesignator().obj);
+		}
 	}
 
 	@Override
@@ -178,6 +217,13 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
+	public void visit(TermPlus termPlus) {
+//		if(t.getParent() instanceof AssignopDesigStatement) {
+			Code.put(Code.dup2);
+//		}
+	}
+	
+	@Override
 	public void visit(TermMinus termMinus) {
 		Code.put(Code.neg);
 	}
@@ -194,16 +240,69 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.load(designator.getDesignator().obj);
 	}
 
-	@Override
-	public void visit(LeftAddop add) {
-		if (add.getAddopLeft() instanceof Minus) Code.put(Code.sub);
-		else if (add.getAddopLeft() instanceof Plus) Code.put(Code.add);
+	public void visit(SimpleDesignator sd) {
+		if(sd.getParent() instanceof AssignopDesigStatement) {
+			Code.load(sd.obj);
+		}
 	}
 	
+//	@Override
+//	public void visit(LeftAddop add) {
+//		if (add.getAddopLeft() instanceof Minus) Code.put(Code.sub);
+//		else if (add.getAddopLeft() instanceof Plus) Code.put(Code.add);
+//	}
+	
+//	@Override
+//	public void visit(Plus add) {
+//		Code.put(Code.add);
+//	}
+//	
+//	@Override
+//	public void visit(Minus add) {
+//		Code.put(Code.sub);
+//	}
+	
 	@Override
-	public void visit(RightAddop add) {
+	public void visit(TermsList t) {
 		
+//		if(t.getParent() instanceof AssignopDesigStatement) {
+//			Code.put(Code.dup2);
+//		}
+		
+		Addop add = t.getAddop();
+		if (add instanceof RightAddop) {
+			RightAddop ra = (RightAddop) add;
+			if (ra.getAddopRight() instanceof MinusEqual) {
+				Code.put(Code.sub);
+				Code.put(Code.dup);
+			}
+			else if (ra.getAddopRight() instanceof PlusEqual) {
+				Code.put(Code.add);
+				Code.put(Code.dup);
+			}
+		}
+		else if (add instanceof LeftAddop) {
+			LeftAddop la = (LeftAddop) add;
+			if (la.getAddopLeft() instanceof Minus) {
+				Code.put(Code.sub);
+			}
+			else if (la.getAddopLeft() instanceof Plus) {
+				Code.put(Code.add);
+			}
+		}
 	}
+	
+//	@Override
+//	public void visit(RightAddop add) {
+//		if (add.getAddopRight() instanceof MinusEqual) {
+//			Code.put(Code.sub);
+//			Code.put(Code.dup);
+//		}
+//		else if (add.getAddopRight() instanceof PlusEqual) {
+//			Code.put(Code.add);
+//			Code.put(Code.dup);
+//		}
+//	}
 	
 	@Override
 	public void visit(LeftMulop mulopLeft) {

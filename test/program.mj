@@ -1,13 +1,16 @@
 // Test301
 
 program test301
-	int niz[];	
+	int niz[];
+	int b;
 {
 	void main()	
 		int x;
 	{
+		x = 0;
+		b = 0;
 		
-		niz[0]= 2;
+		x += b + 2;
 	}
 }
 

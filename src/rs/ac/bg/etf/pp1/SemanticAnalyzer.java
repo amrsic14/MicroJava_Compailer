@@ -498,6 +498,8 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		}
 		
 		designatorArray.obj = new Obj(Obj.Elem, "Elem", struct.getElemType());
+		System.out.println("---");
+//		designatorArray.getArrDesig().getDesignator().obj = new Obj(Obj.Elem, "Elem", struct.getElemType());
 		
 		if (!designatorArray.getExpr().struct.assignableTo(Tab.intType)) {
 			report_error("Indeks niza mora biti tipa int ", null);
@@ -505,7 +507,8 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 	
 //	public void visit(ArrDesig designator) {
-//		designator.getDesignator().obj = new Obj(Obj.Elem, "Elem", designator.getDesignator().obj.getType());;
+////		designator.getDesignator().obj = new Obj(Obj.Elem, "Elem", designator.getDesignator().obj.getType());
+//		System.out.println("+++");
 //	}
 	
 	public boolean passed() {
