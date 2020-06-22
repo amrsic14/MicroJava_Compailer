@@ -51,15 +51,15 @@ scan with {:
 
 terminal PROGRAM, LBRACE, RBRACE, SEMI, LSQBRACE, RSQBRACE, INC, DEC, OR, AND, MINUS, DOT, PRINT, RETURN, PLUS, CONTINUE;
 terminal MUL, DIV, MOD, LPAREN, RPAREN, ASSIGN, VOID, FOR, BREAK, COMMA, IF, ELSE,  CONST, NEW, TRUE, FALSE, EQUAL, LESS;
-terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ;
+terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ, PLUSEQ, MINUSEQ, MULEQ, DIVEQ, MODEQ;
 terminal Integer NUMCONST ;
 terminal Character CHARCONST;
 terminal String IDENT;
 
-nonterminal MethodList, DesignatorStatement, Condition, OptDesigStatement, VarDecl, ConstList, Const, DeclList, Var;
+nonterminal MethodList, DesignatorStatement, Condition, OptDesigStatement, VarDecl, ConstList, Const, DeclList, Var, MulopLeft;
 nonterminal FParamDeclList, OptExpr, ForParenEnd, DesigOptActLeftParen, ForFirstSemi, And, FParamDeclaration, FormPars; 
 nonterminal StatementList, Else, IfCondBegin, Statement, Addop, OptActualParams, ActPars, Relop, Mulop, IfCond, OptCond;
-nonterminal VarList, ConstDecl, ArrDesig, Assignop, CondTerm, CondFact, ActualParam, Or;
+nonterminal VarList, ConstDecl, ArrDesig, Assignop, CondTerm, CondFact, ActualParam, Or, AddopLeft, AddopRight, MulopRight;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl, BoolConst; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Factor, Expr, Term, VarDeclList; 
@@ -236,16 +236,36 @@ Designator ::= 	(ArrayDesignator) ArrDesig LSQBRACE Expr RSQBRACE
 
 ArrDesig ::= (ArrDesig) Designator;
 
-Addop ::= 	(Plus) PLUS 
-		  |	(Minus) MINUS
+Addop ::= 	(LeftAddop) AddopLeft
+		|	(RightAddop) AddopRight
+		;
+
+AddopLeft ::= 	(Plus) PLUS 
+		  |		(Minus) MINUS
 		  ;
 
-Mulop ::= 	(Mul) MUL
-		  |	(Div) DIV 
-		  |	(Mod) MOD
+AddopRight ::= 	(PlusEqual) PLUSEQ
+			  |	(MinusEqual) MINUSEQ
+			  ;
+
+Mulop ::= 	(LeftMulop) MulopLeft
+		|	(RightMulop) MulopRight
+		;
+
+MulopLeft ::= 	(Mul) MUL
+		  |		(Div) DIV 
+		  |		(Mod) MOD
 		  ;
 
-Assignop ::= (Assignop) ASSIGN;
+MulopRight ::= 	(MulEqual) MULEQ
+		  |		(DivEqual) DIVEQ
+		  |		(ModEqual) MODEQ
+		  ;
+
+Assignop ::= 	(Assignop) ASSIGN
+			|	(AssignopAddopRight) AddopRight
+			|	(AssignMulopRight) MulopRight
+			;
 
 Relop ::= 	(Equal) EQUAL
 		  |	(NotEqual) NOTEQUAL

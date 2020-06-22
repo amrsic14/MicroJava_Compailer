@@ -193,18 +193,29 @@ public class CodeGenerator extends VisitorAdaptor {
 	public void visit(ArrDesig designator) {
 		Code.load(designator.getDesignator().obj);
 	}
-	
-	@Override
-	public void visit(TermsList addExpr) {
-		if (addExpr.getAddop() instanceof Minus) Code.put(Code.sub);
-		if (addExpr.getAddop() instanceof Plus) Code.put(Code.add);
-	}
 
 	@Override
-	public void visit(TermMulopFactor termMulopFactor) {
-		if (termMulopFactor.getMulop() instanceof Mod) Code.put(Code.rem);
-		if (termMulopFactor.getMulop() instanceof Div) Code.put(Code.div);
-		if (termMulopFactor.getMulop() instanceof Mul) Code.put(Code.mul);
+	public void visit(LeftAddop add) {
+		if (add.getAddopLeft() instanceof Minus) Code.put(Code.sub);
+		else if (add.getAddopLeft() instanceof Plus) Code.put(Code.add);
+	}
+	
+	@Override
+	public void visit(RightAddop add) {
+		
+	}
+	
+	@Override
+	public void visit(LeftMulop mulopLeft) {
+		MulopLeft mulop = mulopLeft.getMulopLeft();
+		if (mulop instanceof Mod) Code.put(Code.rem);
+		else if (mulop instanceof Div) Code.put(Code.div);
+		else if (mulop instanceof Mul) Code.put(Code.mul);
+	}
+	
+	@Override
+	public void visit(RightMulop mulopLeft) {
+		
 	}
 	
 	@Override

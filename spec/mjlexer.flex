@@ -92,6 +92,11 @@ import java_cup.runtime.Symbol;
 "=" 		{ return new_symbol(sym.ASSIGN, 		yytext()); }
 "++" 		{ return new_symbol(sym.INC, 			yytext()); }
 "--" 		{ return new_symbol(sym.DEC, 			yytext()); }
+"+=" 		{ return new_symbol(sym.PLUSEQ, 		yytext()); }
+"-=" 		{ return new_symbol(sym.MINUSEQ, 		yytext()); }
+"*=" 		{ return new_symbol(sym.MULEQ, 			yytext()); }
+"/=" 		{ return new_symbol(sym.DIVEQ, 			yytext()); }
+"%=" 		{ return new_symbol(sym.MODEQ, 			yytext()); }
 
 // SEPARATORS
 ";" 		{ return new_symbol(sym.SEMI, 	yytext()); }

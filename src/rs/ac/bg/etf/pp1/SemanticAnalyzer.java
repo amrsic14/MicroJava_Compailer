@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import rs.ac.bg.etf.pp1.ast.*;
 import rs.etf.pp1.symboltable.*;
 import rs.etf.pp1.symboltable.concepts.*;
+import rs.etf.pp1.symboltable.visitors.DumpSymbolTableVisitor;
 
 public class SemanticAnalyzer extends VisitorAdaptor {
 
@@ -485,18 +486,27 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 
 	public void visit(ArrayDesignator designatorArray) {
-		Struct t = designatorArray.getArrDesig().getDesignator().obj.getType();
+		Struct struct = designatorArray.getArrDesig().getDesignator().obj.getType();
 		
-		if (t.getKind() != Struct.Array) {
+		if (struct.getKind() != Struct.Array) {
 			report_error("Designator nije tipa niza ", null);
 		}
+		else {
+			DumpSymbolTableVisitor printer = new DumpSymbolTableVisitor();
+			printer.visitObjNode(designatorArray.getArrDesig().getDesignator().obj);
+			report_info("Detektovan pristup elementu niza : " + printer.getOutput(), designatorArray);
+		}
 		
-		designatorArray.obj = new Obj(Obj.Elem, "Elem", t.getElemType());
+		designatorArray.obj = new Obj(Obj.Elem, "Elem", struct.getElemType());
 		
 		if (!designatorArray.getExpr().struct.assignableTo(Tab.intType)) {
 			report_error("Indeks niza mora biti tipa int ", null);
 		}
 	}
+	
+//	public void visit(ArrDesig designator) {
+//		designator.getDesignator().obj = new Obj(Obj.Elem, "Elem", designator.getDesignator().obj.getType());;
+//	}
 	
 	public boolean passed() {
 		return !errorDetected;

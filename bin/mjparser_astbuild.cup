@@ -51,7 +51,7 @@ scan with {:
 
 terminal PROGRAM, LBRACE, RBRACE, SEMI, LSQBRACE, RSQBRACE, INC, DEC, OR, AND, MINUS, DOT, PRINT, RETURN, PLUS, CONTINUE;
 terminal MUL, DIV, MOD, LPAREN, RPAREN, ASSIGN, VOID, FOR, BREAK, COMMA, IF, ELSE,  CONST, NEW, TRUE, FALSE, EQUAL, LESS;
-terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ;
+terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ, PLUSEQ, MINUSEQ, MULEQ, DIVEQ, MODEQ;
 terminal Integer NUMCONST ;
 terminal Character CHARCONST;
 terminal String IDENT;
@@ -65,6 +65,7 @@ nonterminal ConstList ConstList;
 nonterminal Const Const;
 nonterminal DeclList DeclList;
 nonterminal Var Var;
+nonterminal MulopLeft MulopLeft;
 nonterminal FParamDeclList FParamDeclList;
 nonterminal OptExpr OptExpr;
 nonterminal ForParenEnd ForParenEnd;
@@ -92,6 +93,9 @@ nonterminal CondTerm CondTerm;
 nonterminal CondFact CondFact;
 nonterminal ActualParam ActualParam;
 nonterminal Or Or;
+nonterminal AddopLeft AddopLeft;
+nonterminal AddopRight AddopRight;
+nonterminal MulopRight MulopRight;
 
 nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl, BoolConst; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Factor, Expr, Term, VarDeclList; 
@@ -268,16 +272,36 @@ Designator ::= 	(ArrayDesignator) ArrDesig:A1 LSQBRACE Expr:E2 RSQBRACE {: RESUL
 
 ArrDesig ::= (ArrDesig) Designator:D1 {: RESULT=new ArrDesig(D1); RESULT.setLine(D1left); :};
 
-Addop ::= 	(Plus) PLUS {: RESULT=new Plus(); :} 
-		  |	(Minus) MINUS {: RESULT=new Minus(); :}
+Addop ::= 	(LeftAddop) AddopLeft:A1 {: RESULT=new LeftAddop(A1); RESULT.setLine(A1left); :}
+		|	(RightAddop) AddopRight:A1 {: RESULT=new RightAddop(A1); RESULT.setLine(A1left); :}
+		;
+
+AddopLeft ::= 	(Plus) PLUS {: RESULT=new Plus(); :} 
+		  |		(Minus) MINUS {: RESULT=new Minus(); :}
 		  ;
 
-Mulop ::= 	(Mul) MUL {: RESULT=new Mul(); :}
-		  |	(Div) DIV {: RESULT=new Div(); :} 
-		  |	(Mod) MOD {: RESULT=new Mod(); :}
+AddopRight ::= 	(PlusEqual) PLUSEQ {: RESULT=new PlusEqual(); :}
+			  |	(MinusEqual) MINUSEQ {: RESULT=new MinusEqual(); :}
+			  ;
+
+Mulop ::= 	(LeftMulop) MulopLeft:M1 {: RESULT=new LeftMulop(M1); RESULT.setLine(M1left); :}
+		|	(RightMulop) MulopRight:M1 {: RESULT=new RightMulop(M1); RESULT.setLine(M1left); :}
+		;
+
+MulopLeft ::= 	(Mul) MUL {: RESULT=new Mul(); :}
+		  |		(Div) DIV {: RESULT=new Div(); :} 
+		  |		(Mod) MOD {: RESULT=new Mod(); :}
 		  ;
 
-Assignop ::= (Assignop) ASSIGN {: RESULT=new Assignop(); :};
+MulopRight ::= 	(MulEqual) MULEQ {: RESULT=new MulEqual(); :}
+		  |		(DivEqual) DIVEQ {: RESULT=new DivEqual(); :}
+		  |		(ModEqual) MODEQ {: RESULT=new ModEqual(); :}
+		  ;
+
+Assignop ::= 	(Assignop) ASSIGN {: RESULT=new Assignop(); :}
+			|	(AssignopAddopRight) AddopRight:A1 {: RESULT=new AssignopAddopRight(A1); RESULT.setLine(A1left); :}
+			|	(AssignMulopRight) MulopRight:M1 {: RESULT=new AssignMulopRight(M1); RESULT.setLine(M1left); :}
+			;
 
 Relop ::= 	(Equal) EQUAL {: RESULT=new Equal(); :}
 		  |	(NotEqual) NOTEQUAL {: RESULT=new NotEqual(); :}
