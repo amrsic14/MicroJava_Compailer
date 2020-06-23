@@ -220,13 +220,13 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 
 	@Override
-	public void visit(FactorCharconst factorCharconst) {
-		Code.loadConst(factorCharconst.getValue());
-	}
-
-	@Override
 	public void visit(FactorBoolconst factorBoolconst) {
 		Code.loadConst(factorBoolconst.getValue() ? 1 : 0);
+	}
+	
+	@Override
+	public void visit(FactorCharconst factorCharconst) {
+		Code.loadConst(factorCharconst.getValue());
 	}
 	
 	@Override

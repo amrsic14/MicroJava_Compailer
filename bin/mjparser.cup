@@ -71,6 +71,11 @@ Program ::= (Program) PROGRAM ProgName DeclList LBRACE MethodList RBRACE;
 
 ProgName ::= (ProgName) IDENT:pName;
 
+Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value
+		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value
+		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value
+		;
+
 DeclList ::=	(ConstDeclList) DeclList ConstDecl
 			|	(VarsDeclList) DeclList VarDecl
 			|	(NoDeclList)
@@ -80,16 +85,24 @@ ConstList ::=	(Constants) ConstList COMMA Const
 			|	(Constant) Const
 			;
 
-ConstDecl ::= (ConstDecl) CONST Type ConstList SEMI;
-
-Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value
-		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value
-		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value
-		;
-
 VarDeclList ::= 	(VarDeclarations) VarDeclList VarDecl  
 				|	(NoVarDecl)
 				;
+
+StatementList ::= 	(Statements) StatementList Statement 
+				|	(NoStmt)
+				;
+				
+MethodList ::= 	(MethodDeclarations) MethodList MethodDecl
+			|	(NoMethodDecl)
+			;
+			
+FParamDeclList ::= 	(FParamDeclarations) FParamDeclList COMMA FParamDeclaration
+				|	(FParamDeclSingle) FParamDeclaration
+				|	(FParamDeclListError) error COMMA FParamDeclaration
+				;
+
+ConstDecl ::= (ConstDecl) CONST Type ConstList SEMI;
 
 VarList ::= 	(VariableList) VarList COMMA Var
 			|	(VariableListSingleVar) Var
@@ -107,33 +120,12 @@ Var ::= 	(VarArray) IDENT:name LSQBRACE RSQBRACE
 Type ::= (Type) IDENT:typeName
 		;
 
-MethodList ::= 	(MethodDeclarations) MethodList MethodDecl
-			|	(NoMethodDecl)
-			;
-
 MethodDecl ::= 	(MethodDeclaration) MethodTypeName LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE
 			|	(MethodDeclarationError) MethodTypeName LPAREN error RPAREN VarDeclList LBRACE StatementList RBRACE
 			;
 
 MethodTypeName ::= 	(MethodRetTypeName) Type:retType IDENT:methName
 				|	(MethodRetVoidName) VOID:retType IDENT:methName
-				;
-
-FormPars ::= 	(FormalParameters) FParamDeclList
-			 |	(NoFormalParameters)
-			 ;
-
-FParamDeclList ::= 	(FParamDeclarations) FParamDeclList COMMA FParamDeclaration
-				|	(FParamDeclSingle) FParamDeclaration
-				|	(FParamDeclListError) error COMMA FParamDeclaration
-				;
-
-FParamDeclaration ::= 	(FormalParamArray) Type IDENT:name LSQBRACE RSQBRACE
-					|	(FormalParamSingle) Type IDENT:name
-					;
-
-StatementList ::= 	(Statements) StatementList Statement 
-				|	(NoStmt)
 				;
 
 Statement ::= 	(StatementDesignator) DesignatorStatement SEMI
@@ -150,13 +142,17 @@ Statement ::= 	(StatementDesignator) DesignatorStatement SEMI
 			  |	(MultyStatement) LBRACE StatementList RBRACE
 			  ;
 
-IfCondBegin ::= (IfCondBegin) LPAREN; 
+ForFirstSemi ::= (ForFirstSemi) SEMI;
 
-ForFirstSemi ::= (ForFirstSemi) SEMI;		  
+FormPars ::= 	(FormalParameters) FParamDeclList
+			 |	(NoFormalParameters)
+			 ;
 
-IfCond ::= (IfCond) Condition;
+FParamDeclaration ::= 	(FormalParamArray) Type IDENT:name LSQBRACE RSQBRACE
+					|	(FormalParamSingle) Type IDENT:name
+					;
 
-Else ::= (Else) ELSE;
+IfCondBegin ::= (IfCondBegin) LPAREN; 		  
 
 ForParenEnd ::= (ForParenEnd) RPAREN;
 
@@ -183,21 +179,23 @@ ActPars ::=	(ActParamsList) ActPars COMMA ActualParam
 
 ActualParam ::= (ActualParam) Expr;
 
+IfCond ::= (IfCond) Condition;
+
+Else ::= (Else) ELSE;
+
 OptCond ::= (HasCondition) Condition  
 		|	(NoCondition)
 		;
-
-Condition ::= 	(ConditionTermList) Condition Or CondTerm
-			|	(SingleConditionTerm) CondTerm
-			;
 
 CondTerm ::= 	(ConditionFactList) CondTerm And CondFact
 			|	(SingleConditionFact) CondFact
 			;
 
-And ::= (And) AND;
+Condition ::= 	(ConditionTermList) Condition Or CondTerm
+			|	(SingleConditionTerm) CondTerm
+			;
 
-Or ::= (Or) OR;
+And ::= (And) AND;
 
 CondFact ::= 	(ConditionFactRelop) Expr Relop Expr
 			 |	(ConditionFactExpr) Expr 
@@ -232,6 +230,8 @@ Designator ::= 	(ArrayDesignator) ArrDesig LSQBRACE Expr RSQBRACE
 			;
 
 ArrDesig ::= (ArrDesig) Designator;
+
+Or ::= (Or) OR;
 
 Addop ::= 	(LeftAddop) AddopLeft
 		|	(RightAddop) AddopRight

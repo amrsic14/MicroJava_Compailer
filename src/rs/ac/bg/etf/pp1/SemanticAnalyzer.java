@@ -236,18 +236,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		report_info("For petlja", statementFor);
 	}
 	
-	public void visit(BreakStatement statementBreak) {
-		if (forLevel < 1) {
-			report_error("Greska na " + statementBreak.getLine() + " - " + "break van for petlje", null);
-		}
-	}
-
-	public void visit(ContinueStatement statementContinue) {
-		if (forLevel < 1) {
-			report_error("Greska na " + statementContinue.getLine() + " - " + "continue van for petlje", null);
-		}
-	}
-	
 	public void visit(ReturnStatement statementReturn) {
 		OptExpr optexpr = statementReturn.getOptExpr();
 		Struct methodType = currentMethod.getType();
@@ -444,12 +432,12 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		numConst.struct = Tab.intType;
 	}
 
-	public void visit(FactorCharconst charConst) {
-		charConst.struct = Tab.charType;
-	}
-
 	public void visit(FactorBoolconst boolConst) {
 		boolConst.struct = boolType;
+	}
+	
+	public void visit(FactorCharconst charConst) {
+		charConst.struct = Tab.charType;
 	}
 	
 	public void visit(FactorNewTypeExpr typeExpr) {

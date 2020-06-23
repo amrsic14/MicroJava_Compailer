@@ -107,6 +107,11 @@ Program ::= (Program) PROGRAM ProgName:P1 DeclList:D2 LBRACE MethodList:M3 RBRAC
 
 ProgName ::= (ProgName) IDENT:pName {: RESULT=new ProgName(pName); RESULT.setLine(pNameleft); :};
 
+Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value {: RESULT=new ConstNum(name, value); RESULT.setLine(nameleft); :}
+		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value {: RESULT=new ConstChar(name, value); RESULT.setLine(nameleft); :}
+		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value {: RESULT=new ConstBool(name, value); RESULT.setLine(nameleft); :}
+		;
+
 DeclList ::=	(ConstDeclList) DeclList:D1 ConstDecl:C2 {: RESULT=new ConstDeclList(D1, C2); RESULT.setLine(D1left); :}
 			|	(VarsDeclList) DeclList:D1 VarDecl:V2 {: RESULT=new VarsDeclList(D1, V2); RESULT.setLine(D1left); :}
 			|	(NoDeclList) {: RESULT=new NoDeclList(); :}
@@ -116,16 +121,24 @@ ConstList ::=	(Constants) ConstList:C1 COMMA Const:C2 {: RESULT=new Constants(C1
 			|	(Constant) Const:C1 {: RESULT=new Constant(C1); RESULT.setLine(C1left); :}
 			;
 
-ConstDecl ::= (ConstDecl) CONST Type:T1 ConstList:C2 SEMI {: RESULT=new ConstDecl(T1, C2); RESULT.setLine(T1left); :};
-
-Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value {: RESULT=new ConstNum(name, value); RESULT.setLine(nameleft); :}
-		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value {: RESULT=new ConstChar(name, value); RESULT.setLine(nameleft); :}
-		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value {: RESULT=new ConstBool(name, value); RESULT.setLine(nameleft); :}
-		;
-
 VarDeclList ::= 	(VarDeclarations) VarDeclList:V1 VarDecl:V2 {: RESULT=new VarDeclarations(V1, V2); RESULT.setLine(V1left); :}  
 				|	(NoVarDecl) {: RESULT=new NoVarDecl(); :}
 				;
+
+StatementList ::= 	(Statements) StatementList:S1 Statement:S2 {: RESULT=new Statements(S1, S2); RESULT.setLine(S1left); :} 
+				|	(NoStmt) {: RESULT=new NoStmt(); :}
+				;
+				
+MethodList ::= 	(MethodDeclarations) MethodList:M1 MethodDecl:M2 {: RESULT=new MethodDeclarations(M1, M2); RESULT.setLine(M1left); :}
+			|	(NoMethodDecl) {: RESULT=new NoMethodDecl(); :}
+			;
+			
+FParamDeclList ::= 	(FParamDeclarations) FParamDeclList:F1 COMMA FParamDeclaration:F2 {: RESULT=new FParamDeclarations(F1, F2); RESULT.setLine(F1left); :}
+				|	(FParamDeclSingle) FParamDeclaration:F1 {: RESULT=new FParamDeclSingle(F1); RESULT.setLine(F1left); :}
+				|	(FParamDeclListError) error COMMA FParamDeclaration:F1 {: RESULT=new FParamDeclListError(F1); RESULT.setLine(F1left); :}
+				;
+
+ConstDecl ::= (ConstDecl) CONST Type:T1 ConstList:C2 SEMI {: RESULT=new ConstDecl(T1, C2); RESULT.setLine(T1left); :};
 
 VarList ::= 	(VariableList) VarList:V1 COMMA Var:V2 {: RESULT=new VariableList(V1, V2); RESULT.setLine(V1left); :}
 			|	(VariableListSingleVar) Var:V1 {: RESULT=new VariableListSingleVar(V1); RESULT.setLine(V1left); :}
@@ -143,33 +156,12 @@ Var ::= 	(VarArray) IDENT:name LSQBRACE RSQBRACE {: RESULT=new VarArray(name); R
 Type ::= (Type) IDENT:typeName {: RESULT=new Type(typeName); RESULT.setLine(typeNameleft); :}
 		;
 
-MethodList ::= 	(MethodDeclarations) MethodList:M1 MethodDecl:M2 {: RESULT=new MethodDeclarations(M1, M2); RESULT.setLine(M1left); :}
-			|	(NoMethodDecl) {: RESULT=new NoMethodDecl(); :}
-			;
-
 MethodDecl ::= 	(MethodDeclaration) MethodTypeName:M1 LPAREN FormPars:F2 RPAREN VarDeclList:V3 LBRACE StatementList:S4 RBRACE {: RESULT=new MethodDeclaration(M1, F2, V3, S4); RESULT.setLine(M1left); :}
 			|	(MethodDeclarationError) MethodTypeName:M1 LPAREN error RPAREN VarDeclList:V2 LBRACE StatementList:S3 RBRACE {: RESULT=new MethodDeclarationError(M1, V2, S3); RESULT.setLine(M1left); :}
 			;
 
 MethodTypeName ::= 	(MethodRetTypeName) Type:retType IDENT:methName {: RESULT=new MethodRetTypeName(retType, methName); RESULT.setLine(retTypeleft); :}
 				|	(MethodRetVoidName) VOID:retType IDENT:methName {: RESULT=new MethodRetVoidName(methName); RESULT.setLine(methNameleft); :}
-				;
-
-FormPars ::= 	(FormalParameters) FParamDeclList:F1 {: RESULT=new FormalParameters(F1); RESULT.setLine(F1left); :}
-			 |	(NoFormalParameters) {: RESULT=new NoFormalParameters(); :}
-			 ;
-
-FParamDeclList ::= 	(FParamDeclarations) FParamDeclList:F1 COMMA FParamDeclaration:F2 {: RESULT=new FParamDeclarations(F1, F2); RESULT.setLine(F1left); :}
-				|	(FParamDeclSingle) FParamDeclaration:F1 {: RESULT=new FParamDeclSingle(F1); RESULT.setLine(F1left); :}
-				|	(FParamDeclListError) error COMMA FParamDeclaration:F1 {: RESULT=new FParamDeclListError(F1); RESULT.setLine(F1left); :}
-				;
-
-FParamDeclaration ::= 	(FormalParamArray) Type:T1 IDENT:name LSQBRACE RSQBRACE {: RESULT=new FormalParamArray(T1, name); RESULT.setLine(T1left); :}
-					|	(FormalParamSingle) Type:T1 IDENT:name {: RESULT=new FormalParamSingle(T1, name); RESULT.setLine(T1left); :}
-					;
-
-StatementList ::= 	(Statements) StatementList:S1 Statement:S2 {: RESULT=new Statements(S1, S2); RESULT.setLine(S1left); :} 
-				|	(NoStmt) {: RESULT=new NoStmt(); :}
 				;
 
 Statement ::= 	(StatementDesignator) DesignatorStatement:D1 SEMI {: RESULT=new StatementDesignator(D1); RESULT.setLine(D1left); :}
@@ -186,13 +178,17 @@ Statement ::= 	(StatementDesignator) DesignatorStatement:D1 SEMI {: RESULT=new S
 			  |	(MultyStatement) LBRACE StatementList:S1 RBRACE {: RESULT=new MultyStatement(S1); RESULT.setLine(S1left); :}
 			  ;
 
-IfCondBegin ::= (IfCondBegin) LPAREN {: RESULT=new IfCondBegin(); :}; 
+ForFirstSemi ::= (ForFirstSemi) SEMI {: RESULT=new ForFirstSemi(); :};
 
-ForFirstSemi ::= (ForFirstSemi) SEMI {: RESULT=new ForFirstSemi(); :};		  
+FormPars ::= 	(FormalParameters) FParamDeclList:F1 {: RESULT=new FormalParameters(F1); RESULT.setLine(F1left); :}
+			 |	(NoFormalParameters) {: RESULT=new NoFormalParameters(); :}
+			 ;
 
-IfCond ::= (IfCond) Condition:C1 {: RESULT=new IfCond(C1); RESULT.setLine(C1left); :};
+FParamDeclaration ::= 	(FormalParamArray) Type:T1 IDENT:name LSQBRACE RSQBRACE {: RESULT=new FormalParamArray(T1, name); RESULT.setLine(T1left); :}
+					|	(FormalParamSingle) Type:T1 IDENT:name {: RESULT=new FormalParamSingle(T1, name); RESULT.setLine(T1left); :}
+					;
 
-Else ::= (Else) ELSE {: RESULT=new Else(); :};
+IfCondBegin ::= (IfCondBegin) LPAREN {: RESULT=new IfCondBegin(); :}; 		  
 
 ForParenEnd ::= (ForParenEnd) RPAREN {: RESULT=new ForParenEnd(); :};
 
@@ -219,21 +215,23 @@ ActPars ::=	(ActParamsList) ActPars:A1 COMMA ActualParam:A2 {: RESULT=new ActPar
 
 ActualParam ::= (ActualParam) Expr:E1 {: RESULT=new ActualParam(E1); RESULT.setLine(E1left); :};
 
+IfCond ::= (IfCond) Condition:C1 {: RESULT=new IfCond(C1); RESULT.setLine(C1left); :};
+
+Else ::= (Else) ELSE {: RESULT=new Else(); :};
+
 OptCond ::= (HasCondition) Condition:C1 {: RESULT=new HasCondition(C1); RESULT.setLine(C1left); :}  
 		|	(NoCondition) {: RESULT=new NoCondition(); :}
 		;
-
-Condition ::= 	(ConditionTermList) Condition:C1 Or:O2 CondTerm:C3 {: RESULT=new ConditionTermList(C1, O2, C3); RESULT.setLine(C1left); :}
-			|	(SingleConditionTerm) CondTerm:C1 {: RESULT=new SingleConditionTerm(C1); RESULT.setLine(C1left); :}
-			;
 
 CondTerm ::= 	(ConditionFactList) CondTerm:C1 And:A2 CondFact:C3 {: RESULT=new ConditionFactList(C1, A2, C3); RESULT.setLine(C1left); :}
 			|	(SingleConditionFact) CondFact:C1 {: RESULT=new SingleConditionFact(C1); RESULT.setLine(C1left); :}
 			;
 
-And ::= (And) AND {: RESULT=new And(); :};
+Condition ::= 	(ConditionTermList) Condition:C1 Or:O2 CondTerm:C3 {: RESULT=new ConditionTermList(C1, O2, C3); RESULT.setLine(C1left); :}
+			|	(SingleConditionTerm) CondTerm:C1 {: RESULT=new SingleConditionTerm(C1); RESULT.setLine(C1left); :}
+			;
 
-Or ::= (Or) OR {: RESULT=new Or(); :};
+And ::= (And) AND {: RESULT=new And(); :};
 
 CondFact ::= 	(ConditionFactRelop) Expr:E1 Relop:R2 Expr:E3 {: RESULT=new ConditionFactRelop(E1, R2, E3); RESULT.setLine(E1left); :}
 			 |	(ConditionFactExpr) Expr:E1 {: RESULT=new ConditionFactExpr(E1); RESULT.setLine(E1left); :} 
@@ -268,6 +266,8 @@ Designator ::= 	(ArrayDesignator) ArrDesig:A1 LSQBRACE Expr:E2 RSQBRACE {: RESUL
 			;
 
 ArrDesig ::= (ArrDesig) Designator:D1 {: RESULT=new ArrDesig(D1); RESULT.setLine(D1left); :};
+
+Or ::= (Or) OR {: RESULT=new Or(); :};
 
 Addop ::= 	(LeftAddop) AddopLeft:A1 {: RESULT=new LeftAddop(A1); RESULT.setLine(A1left); :}
 		|	(RightAddop) AddopRight:A1 {: RESULT=new RightAddop(A1); RESULT.setLine(A1left); :}
