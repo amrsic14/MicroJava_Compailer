@@ -1,0 +1,29 @@
+program MJProgram
+	int a;
+	const int c = 5;
+	int f,d;
+	char /, ch; 						//greska kod deklarisanja globalne promenljive
+	int asf;
+	const bool bl = true;
+{
+	int proba(int nov, bool)		//greska kod deklarisanja formalnih parametara metode
+	{
+		a = a;
+		
+		return a;
+	}
+	
+	void main()
+	bool b;
+	int i = 7						//greska kod deklarisanja lokalne promenljive
+	char t;
+	{
+		d = 4;
+		
+		for(;- ; )				//greska u uslovu za for petlju
+		{
+		}
+		
+		print(d);
+	}
+}

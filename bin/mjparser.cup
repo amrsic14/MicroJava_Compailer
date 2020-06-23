@@ -54,6 +54,7 @@ terminal MUL, DIV, MOD, LPAREN, RPAREN, ASSIGN, VOID, FOR, BREAK, COMMA, IF, ELS
 terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ, PLUSEQ, MINUSEQ, MULEQ, DIVEQ, MODEQ;
 terminal Integer NUMCONST ;
 terminal Character CHARCONST;
+terminal Boolean BOOLCONST;
 terminal String IDENT;
 
 nonterminal MethodList, DesignatorStatement, Condition, OptDesigStatement, VarDecl, ConstList, Const, DeclList, Var, MulopLeft;
@@ -61,7 +62,7 @@ nonterminal FParamDeclList, OptExpr, ForParenEnd, DesigOptActLeftParen, ForFirst
 nonterminal StatementList, Else, IfCondBegin, Statement, Addop, OptActualParams, ActPars, Relop, Mulop, IfCond, OptCond;
 nonterminal VarList, ConstDecl, ArrDesig, Assignop, CondTerm, CondFact, ActualParam, Or, AddopLeft, AddopRight, MulopRight;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl, BoolConst; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Factor, Expr, Term, VarDeclList; 
 
 precedence left ELSE;
@@ -83,12 +84,8 @@ ConstDecl ::= (ConstDecl) CONST Type ConstList SEMI;
 
 Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value
 		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value
-		|	(ConstBool) IDENT:name ASSIGN BoolConst:value
+		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value
 		;
-
-BoolConst ::= 	(True) TRUE
-			|	(False) FALSE
-			;
 
 VarDeclList ::= 	(VarDeclarations) VarDeclList VarDecl  
 				|	(NoVarDecl)
@@ -225,7 +222,7 @@ Factor ::= 	(FactorDesignatorHasActs) Designator DesigOptActLeftParen OptActualP
 		   |(FactorNewType) NEW Type
 		   |(FactorNumconst) NUMCONST:value
 		   |(FactorCharconst) CHARCONST:value
-		   |(FactorBoolconst) BoolConst:value
+		   |(FactorBoolconst) BOOLCONST:value
 		   |(FactorParenths) LPAREN Expr RPAREN
            ;
 

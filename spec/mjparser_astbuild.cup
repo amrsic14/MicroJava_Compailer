@@ -54,6 +54,7 @@ terminal MUL, DIV, MOD, LPAREN, RPAREN, ASSIGN, VOID, FOR, BREAK, COMMA, IF, ELS
 terminal NOTEQUAL, GREATEREQUAL, LESSEQUAL, GREATER, READ, PLUSEQ, MINUSEQ, MULEQ, DIVEQ, MODEQ;
 terminal Integer NUMCONST ;
 terminal Character CHARCONST;
+terminal Boolean BOOLCONST;
 terminal String IDENT;
 
 nonterminal MethodList MethodList;
@@ -97,7 +98,7 @@ nonterminal AddopLeft AddopLeft;
 nonterminal AddopRight AddopRight;
 nonterminal MulopRight MulopRight;
 
-nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl, BoolConst; 
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Program, ProgName, MethodTypeName, Designator, MethodDecl; 
 nonterminal rs.etf.pp1.symboltable.concepts.Struct Type, Factor, Expr, Term, VarDeclList; 
 
 precedence left ELSE;
@@ -119,12 +120,8 @@ ConstDecl ::= (ConstDecl) CONST Type:T1 ConstList:C2 SEMI {: RESULT=new ConstDec
 
 Const ::= 	(ConstNum) IDENT:name ASSIGN NUMCONST:value {: RESULT=new ConstNum(name, value); RESULT.setLine(nameleft); :}
 		|	(ConstChar) IDENT:name ASSIGN CHARCONST:value {: RESULT=new ConstChar(name, value); RESULT.setLine(nameleft); :}
-		|	(ConstBool) IDENT:name ASSIGN BoolConst:value {: RESULT=new ConstBool(name, value); RESULT.setLine(nameleft); :}
+		|	(ConstBool) IDENT:name ASSIGN BOOLCONST:value {: RESULT=new ConstBool(name, value); RESULT.setLine(nameleft); :}
 		;
-
-BoolConst ::= 	(True) TRUE {: RESULT=new True(); :}
-			|	(False) FALSE {: RESULT=new False(); :}
-			;
 
 VarDeclList ::= 	(VarDeclarations) VarDeclList:V1 VarDecl:V2 {: RESULT=new VarDeclarations(V1, V2); RESULT.setLine(V1left); :}  
 				|	(NoVarDecl) {: RESULT=new NoVarDecl(); :}
@@ -261,7 +258,7 @@ Factor ::= 	(FactorDesignatorHasActs) Designator:D1 DesigOptActLeftParen:D2 OptA
 		   |(FactorNewType) NEW Type:T1 {: RESULT=new FactorNewType(T1); RESULT.setLine(T1left); :}
 		   |(FactorNumconst) NUMCONST:value {: RESULT=new FactorNumconst(value); RESULT.setLine(valueleft); :}
 		   |(FactorCharconst) CHARCONST:value {: RESULT=new FactorCharconst(value); RESULT.setLine(valueleft); :}
-		   |(FactorBoolconst) BoolConst:value {: RESULT=new FactorBoolconst(value); RESULT.setLine(valueleft); :}
+		   |(FactorBoolconst) BOOLCONST:value {: RESULT=new FactorBoolconst(value); RESULT.setLine(valueleft); :}
 		   |(FactorParenths) LPAREN Expr:E1 RPAREN {: RESULT=new FactorParenths(E1); RESULT.setLine(E1left); :}
            ;
 

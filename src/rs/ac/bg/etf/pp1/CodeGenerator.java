@@ -226,7 +226,7 @@ public class CodeGenerator extends VisitorAdaptor {
 
 	@Override
 	public void visit(FactorBoolconst factorBoolconst) {
-		Code.loadConst(factorBoolconst.getBoolConst().obj.getAdr());
+		Code.loadConst(factorBoolconst.getValue() ? 1 : 0);
 	}
 	
 	@Override

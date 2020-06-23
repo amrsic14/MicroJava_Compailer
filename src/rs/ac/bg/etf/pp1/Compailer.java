@@ -13,6 +13,8 @@ import rs.ac.bg.etf.pp1.ast.SyntaxNode;
 import rs.ac.bg.etf.pp1.util.Log4JUtils;
 import rs.etf.pp1.mj.runtime.Code;
 import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.concepts.Obj;
+import rs.etf.pp1.symboltable.concepts.Struct;
 
 
 public class Compailer {
@@ -44,6 +46,7 @@ public class Compailer {
 	        SyntaxNode prog = (SyntaxNode)(s.value);
 	        
 			Tab.init(); // Universe scope
+
 			SemanticAnalyzer semanticCheck = new SemanticAnalyzer();
 			prog.traverseBottomUp(semanticCheck);
 			

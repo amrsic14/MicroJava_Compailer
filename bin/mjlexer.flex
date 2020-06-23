@@ -60,8 +60,8 @@ import java_cup.runtime.Symbol;
 "return" 		{ return new_symbol(sym.RETURN, 	yytext()); }
 "void" 			{ return new_symbol(sym.VOID, 		yytext()); }
 
-"true" 		{ return new_symbol(sym.TRUE, 	yytext()); }
-"false" 			{ return new_symbol(sym.FALSE, 		yytext()); }
+//"true" 		{ return new_symbol(sym.TRUE, 	yytext()); }
+//"false" 			{ return new_symbol(sym.FALSE, 		yytext()); }
 
 // PREDECLARED PROCEDURES
 //"chr" 	{ return new_symbol(sym.CHR, yytext()); }
@@ -112,7 +112,7 @@ import java_cup.runtime.Symbol;
 "}"			{ return new_symbol(sym.RBRACE, 	yytext()); }
 
 
-
+"true"|"false"  				{ return new_symbol(sym.BOOLCONST, new Boolean (yytext())); }
 [0-9]+  						{ return new_symbol(sym.NUMCONST, new Integer (yytext())); }
 "'"."'"  						{ return new_symbol(sym.CHARCONST, new Character (yytext().charAt(1))); }
 ([a-z]|[A-Z])[a-z|A-Z|0-9|_]* 	{return new_symbol (sym.IDENT, yytext()); }

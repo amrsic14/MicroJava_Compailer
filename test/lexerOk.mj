@@ -1,0 +1,22 @@
+program MJProgram
+	int a;
+	bool b;
+	const int c= 5;
+	const bool cBool = true;
+	int niz[];
+{
+	void main() {
+		niz = new int[40];
+		niz[5] = 1;
+		
+		niz[c] = 2;
+		niz[2] = 30;
+		
+		a = 12;
+		niz[a] = 120;
+		a = 30;
+		niz[12] += a *= 2;
+		
+		print(niz[10 + 2]);
+	}
+}

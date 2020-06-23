@@ -1,4 +1,2 @@
-/program.obj
 /rs/
-/mjlexer.flex
-/mjparser.cup
+/syntaxRecovery.obj
