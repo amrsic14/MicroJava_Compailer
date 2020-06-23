@@ -42,7 +42,8 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	}
 	
 	public SemanticAnalyzer() {
-		Tab.currentScope.addToLocals(new Obj(Obj.Type, "bool", new Struct(Struct.Bool)));
+		//Tab.currentScope.addToLocals(new Obj(Obj.Type, "bool", new Struct(Struct.Bool)));
+		Tab.insert(Obj.Type, "bool", new Struct(Struct.Bool));
 	}
 	
 	public void visit(Program program) {
