@@ -19,25 +19,33 @@ public class CodeGenerator extends VisitorAdaptor {
 		Code.put(Code.return_);
 	}
 	
-	private void setOrdChr() {
-		Tab.chrObj.setAdr(Code.pc);
-		Tab.ordObj.setAdr(Code.pc);
-		Code.put(Code.enter);
-		Code.put(1);
-		Code.put(1);
-		Code.put(Code.load_n + 0);
-		setMethodReturn();
-	}
-	
-	private void setLen() {
-		Tab.lenObj.setAdr(Code.pc);
-		Code.put(Code.enter);
-		Code.put(1);
-		Code.put(1);
-		Code.put(Code.load_n + 0);
-		Code.put(Code.arraylength);
-		setMethodReturn();
-	}
+//	private void setOrd() {
+//		Tab.ordObj.setAdr(Code.pc);
+//		Code.put(Code.enter);
+//		Code.put(1);
+//		Code.put(1);
+//		Code.put(Code.load_n + 0);
+//		setMethodReturn();
+//	}
+//	
+//	private void setChr() {
+//		Tab.chrObj.setAdr(Code.pc);
+//		Code.put(Code.enter);
+//		Code.put(1);
+//		Code.put(1);
+//		Code.put(Code.load_n + 0);
+//		setMethodReturn();
+//	}
+//	
+//	private void setLen() {
+//		Tab.lenObj.setAdr(Code.pc);
+//		Code.put(Code.enter);
+//		Code.put(1);
+//		Code.put(1);
+//		Code.put(Code.load_n + 0);
+//		Code.put(Code.arraylength);
+//		setMethodReturn();
+//	}
 	
 	@Override
 	public void visit(Program program) {
@@ -46,8 +54,9 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	@Override
 	public void visit(ProgName progrName){
-		setOrdChr();
-		setLen();
+//		setOrd();
+//		setChr();
+//		setLen();
 	}
 
 	@Override
@@ -123,6 +132,12 @@ public class CodeGenerator extends VisitorAdaptor {
 	}
 	
 	@Override
+	public void visit(AssignMulopRight amr) {
+		AssignopDesigStatement ads = (AssignopDesigStatement) amr.getParent();
+		Code.load(ads.getDesignator().obj);
+	}
+	
+	@Override
 	public void visit(ArrayDesignator designatorArray) {
 		if(designatorArray.getParent() instanceof AssignopDesigStatement) {
 			Code.put(Code.dup2);
@@ -136,18 +151,34 @@ public class CodeGenerator extends VisitorAdaptor {
 	
 	@Override
 	public void visit(FactorDesignatorHasActs funcCall) {
-		Code.put(Code.call);
-		Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
+		if(!isStandardMethod(funcCall.getDesignator().obj)) {
+			Code.put(Code.call);
+			Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
+		}
 	}
 	
 	private boolean isElem(Obj obj) {
 		return obj.getKind() == Obj.Elem;
 	}
 	
+	private boolean isStandardMethod(Obj fnc) {
+		String name = fnc.getName();
+		if ("len".equals(name)) {
+			Code.put(Code.arraylength);
+			return true;
+		}
+		else if ("ord".equals(name) || "chr".equals(name)) {
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public void visit(OptionalActualsDesigStatement funcCall) {
-		Code.put(Code.call);
-		Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
+		if(!isStandardMethod(funcCall.getDesignator().obj)) {
+			Code.put(Code.call);
+			Code.put2(funcCall.getDesignator().obj.getAdr() - Code.pc);
+		}
 		if (funcCall.getDesignator().obj.getType() != Tab.noType) {
 			Code.put(Code.pop);
 		}
@@ -240,6 +271,19 @@ public class CodeGenerator extends VisitorAdaptor {
 		if (array.getType().struct == Tab.intType) Code.put(1);
 		if (array.getType().struct == Tab.charType) Code.put(0);
 	}
+	
+//	@Override
+//	public void visit(FactorCharOp fco) {
+//		Code.put(Code.add);
+//		Code.put(Code.dup);
+//		Code.loadConst('Z');
+//		Code.put(Code.div);
+//		Code.loadConst('Z');
+//		Code.put(Code.mul);
+//		Code.put(Code.sub);
+//		Code.loadConst('A');
+//		Code.put(Code.add);
+//	}
 	
 	@Override
 	public void visit(TermMulopFactor tmf) {

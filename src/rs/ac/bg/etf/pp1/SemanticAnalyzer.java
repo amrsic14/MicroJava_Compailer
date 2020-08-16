@@ -1,6 +1,6 @@
 package rs.ac.bg.etf.pp1;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
@@ -28,7 +28,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	public void report_error(String message, SyntaxNode info) {
 		errorDetected = true;
 		StringBuilder msg = new StringBuilder(message);
-		int line = (info == null) ? 0: info.getLine();
+		int line = (info == null) ? 0 : info.getLine();
 		if (line != 0)
 			msg.append (" na liniji ").append(line);
 		log.error(msg.toString());
@@ -36,7 +36,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 
 	public void report_info(String message, SyntaxNode info) {
 		StringBuilder msg = new StringBuilder(message); 
-		int line = (info == null) ? 0: info.getLine();
+		int line = (info == null) ? 0 : info.getLine();
 		if (line != 0)
 			msg.append (" na liniji ").append(line);
 		log.info(msg.toString());
@@ -278,6 +278,7 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 		if (!isAssignable(expr)) {
 			report_error("Greska na " + statementPrintNoConst.getLine() + " - " + "Neodgovarajuci tip izraza u metodi print", statementPrintNoConst.getExpr());
 		}
+		printCallCount++;
 	}
 	
 	public void visit(AssignopDesigStatement assignment) {
@@ -292,7 +293,6 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 	public void visit(AssignopDesigStatementError error) {
 		report_info("Oporavak od greske kod dodele vrednosti (ispred ;)", error);
 	}
-	
 	
 	private void checkArgumentTypes(Obj currentMethod) {
 		ArrayList<Struct> actParams = parameters.pop();
@@ -427,6 +427,20 @@ public class SemanticAnalyzer extends VisitorAdaptor {
 			functionExpr.struct = functionExpr.getDesignator().obj.getType();
 		}
 	}
+	
+//	public void visit(FactorCharOp fco) {
+//		Expr e1 = fco.getExpr();
+//		Expr e2 = fco.getExpr1();
+//		
+//		if(e1.struct.getKind() != Struct.Char) {
+//			report_error("Greska na " + fco.getLine() + " - " + "prvi operand za # mora biti tipa char", null);
+//		}
+//		if(e2.struct.getKind() != Struct.Int) {
+//			report_error("Greska na " + fco.getLine() + " - " + "drugi operand za # mora biti tipa int", null);
+//		}
+//		
+//		fco.struct = e1.struct;
+//	}
 	
 	public void visit(FactorNumconst numConst) {
 		numConst.struct = Tab.intType;

@@ -114,7 +114,7 @@ VarDecl ::= 	(VarDeclaration) Type VarList SEMI
 			;
 
 Var ::= 	(VarArray) IDENT:name LSQBRACE RSQBRACE
-		|	(SingleVar) IDENT:name 
+		|	(SingleVar) IDENT:name
 		;
 
 Type ::= (Type) IDENT:typeName

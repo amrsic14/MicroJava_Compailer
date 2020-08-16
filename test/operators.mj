@@ -1,0 +1,34 @@
+//Test operators
+
+program test_operators
+	int niz[];
+{
+	void main()
+		int x;
+	{
+		niz = new int[2];
+		niz[0] = 5;
+		x = 0;
+		
+		x += 5;
+		niz[0] *= x -= 1;
+		
+		print(x);
+		print(eol);
+		print(niz[0]);
+	}
+}
+
+// TestModif
+
+//program test_modif	
+//{
+//	void main()	
+//		char bodovi;
+//	{
+//		bodovi = ['X' # 10];
+// 
+//		print(bodovi);
+//	}
+//}
+

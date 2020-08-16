@@ -48,7 +48,7 @@ import java_cup.runtime.Symbol;
 "const"   		{ return new_symbol(sym.CONST, 		yytext()); }
 "new" 			{ return new_symbol(sym.NEW, 		yytext()); }
 //"abstract"   	{ return new_symbol(sym.ABSTRACT,	yytext()); }
-//"class"			{ return new_symbol(sym.CLASS, 		yytext()); }
+//"class"		{ return new_symbol(sym.CLASS, 		yytext()); }
 //"extends"		{ return new_symbol(sym.EXTENDS, 	yytext()); }
 "break"			{ return new_symbol(sym.BREAK, 		yytext()); }
 "continue"		{ return new_symbol(sym.CONTINUE, 	yytext()); }
@@ -61,7 +61,7 @@ import java_cup.runtime.Symbol;
 "void" 			{ return new_symbol(sym.VOID, 		yytext()); }
 
 //"true" 		{ return new_symbol(sym.TRUE, 	yytext()); }
-//"false" 			{ return new_symbol(sym.FALSE, 		yytext()); }
+//"false" 		{ return new_symbol(sym.FALSE, 		yytext()); }
 
 // PREDECLARED PROCEDURES
 //"chr" 	{ return new_symbol(sym.CHR, yytext()); }

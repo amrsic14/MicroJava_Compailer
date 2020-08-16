@@ -150,7 +150,7 @@ VarDecl ::= 	(VarDeclaration) Type:T1 VarList:V2 SEMI {: RESULT=new VarDeclarati
 			;
 
 Var ::= 	(VarArray) IDENT:name LSQBRACE RSQBRACE {: RESULT=new VarArray(name); RESULT.setLine(nameleft); :}
-		|	(SingleVar) IDENT:name {: RESULT=new SingleVar(name); RESULT.setLine(nameleft); :} 
+		|	(SingleVar) IDENT:name {: RESULT=new SingleVar(name); RESULT.setLine(nameleft); :}
 		;
 
 Type ::= (Type) IDENT:typeName {: RESULT=new Type(typeName); RESULT.setLine(typeNameleft); :}
